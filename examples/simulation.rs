@@ -1,12 +1,13 @@
-use zttt_rs::{Board, Player, GameResult};
+use zttt_rs::{Board, Player, GameResult, PerfectEngine, Engine};
 use std::time::Instant;
 
 fn simulate_game() -> GameResult {
     let mut board = Board::new();
     let mut current_player = Player::X;
+    let engine = PerfectEngine::new();
     
     while board.game_result() == GameResult::InProgress {
-        if let Some((row, col)) = board.best_move(current_player) {
+        if let Some((row, col)) = engine.choose_move(&board, current_player) {
             board.make_move(row, col, current_player).unwrap();
             current_player = current_player.opponent();
         }

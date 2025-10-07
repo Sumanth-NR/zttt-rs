@@ -3,13 +3,14 @@
 [![Rust](https://img.shields.io/badge/rust-1.90%2B-orange.svg)](https://www.rust-lang.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-A high-performance Rust backend for TicTacToe games with optimized AI, inspired by [ZTicTacToe](https://github.com/ZTicTacToe) in Python.
+A high-performance Rust backend for TicTacToe games with pluggable engines, inspired by [ZTicTacToe](https://github.com/ZTicTacToe) in Python.
 
 ## Features
 
 - **Efficient State Representation**: Compact board representation optimized for performance
 - **Complete Game Logic**: Move validation, win detection, and game state management
-- **Optimized AI**: Minimax algorithm with alpha-beta pruning for fast best-move calculation
+- **Pluggable Engine Architecture**: Trait-based system for implementing custom move selection strategies
+- **Perfect Engine**: Built-in engine using minimax with alpha-beta pruning for optimal play
 - **Fast Simulations**: Designed for researchers and users who need high-speed game simulations
 - **Well-Tested**: Comprehensive test suite ensuring correctness
 - **Easy to Use**: Simple, intuitive API
@@ -61,35 +62,39 @@ fn main() {
 }
 ```
 
-### AI-Powered Best Move
+### Using the Perfect Engine
 
 ```rust
-use zttt_rs::{Board, Player};
+use zttt_rs::{Board, Player, PerfectEngine, Engine};
 
 fn main() {
     let mut board = Board::new();
     board.make_move(0, 0, Player::X).unwrap();
     board.make_move(1, 1, Player::O).unwrap();
     
+    // Create a perfect engine
+    let engine = PerfectEngine::new();
+    
     // Get the best move for Player X
-    if let Some((row, col)) = board.best_move(Player::X) {
+    if let Some((row, col)) = engine.choose_move(&board, Player::X) {
         println!("Best move for X: ({}, {})", row, col);
         board.make_move(row, col, Player::X).unwrap();
     }
 }
 ```
 
-### AI vs AI Simulation
+### Engine vs Engine Simulation
 
 ```rust
-use zttt_rs::{Board, Player, GameResult};
+use zttt_rs::{Board, Player, GameResult, PerfectEngine, Engine};
 
 fn simulate_game() -> GameResult {
     let mut board = Board::new();
     let mut current_player = Player::X;
+    let engine = PerfectEngine::new();
     
     while board.game_result() == GameResult::InProgress {
-        if let Some((row, col)) = board.best_move(current_player) {
+        if let Some((row, col)) = engine.choose_move(&board, current_player) {
             board.make_move(row, col, current_player).unwrap();
             current_player = current_player.opponent();
         }
@@ -117,6 +122,38 @@ fn main() {
     println!("X wins: {}", wins_x);
     println!("O wins: {}", wins_o);
     println!("Draws: {}", draws);
+}
+```
+
+### Implementing a Custom Engine
+
+You can implement your own engine by implementing the `Engine` trait:
+
+```rust
+use zttt_rs::{Board, Player, Engine};
+
+/// A random move engine (for demonstration)
+struct RandomEngine;
+
+impl Engine for RandomEngine {
+    fn choose_move(&self, board: &Board, _player: Player) -> Option<(usize, usize)> {
+        let moves = board.valid_moves();
+        if moves.is_empty() {
+            None
+        } else {
+            // In a real implementation, you'd use proper randomization
+            Some(moves[0])
+        }
+    }
+}
+
+fn main() {
+    let mut board = Board::new();
+    let engine = RandomEngine;
+    
+    if let Some((row, col)) = engine.choose_move(&board, Player::X) {
+        board.make_move(row, col, Player::X).unwrap();
+    }
 }
 ```
 
@@ -148,22 +185,40 @@ The main game board structure.
 - `is_valid_move(row, col)` - Checks if a move is valid
 - `valid_moves()` - Returns all valid move positions
 - `game_result()` - Returns the current game result
-- `best_move(player)` - Returns the best move for the given player using AI
+- `choose_move(engine, player)` - Convenience method to get a move from an engine
 - `get(row, col)` - Gets the cell at the specified position
 - `reset()` - Resets the board to empty state
 
+### Engines
+
+#### `Engine` Trait
+Defines the interface for implementing custom move selection strategies.
+
+**Required Methods:**
+
+- `choose_move(&self, board: &Board, player: Player) -> Option<(usize, usize)>` - Choose the best move for the given player
+
+#### `PerfectEngine`
+A built-in engine that uses minimax with alpha-beta pruning for perfect play.
+
+**Methods:**
+
+- `new()` - Creates a new perfect engine
+
 ## Performance
 
-The minimax algorithm with alpha-beta pruning ensures optimal play while maintaining excellent performance:
+The PerfectEngine uses minimax with alpha-beta pruning for optimal play while maintaining excellent performance:
 
 - **Move calculation**: Typically < 1ms for mid-game positions
-- **Full game simulation**: < 10ms per game with two AI players
+- **Full game simulation**: ~1.6ms per game with two perfect engines
+- **Throughput**: ~614 games/second
 - **Suitable for**: Running thousands of simulations quickly
 
 ## Future Plans
 
 - Python bindings via PyO3 for easy Python integration
-- Additional AI algorithms (Monte Carlo Tree Search, Neural Networks)
+- Additional engine implementations (Random, Monte Carlo Tree Search, Neural Networks)
+- Difficulty levels for engines
 - Position analysis and evaluation functions
 - Opening book support
 - Multi-threaded batch simulations

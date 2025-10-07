@@ -1,23 +1,25 @@
 //! # zttt-rs
 //!
-//! A high-performance Rust backend for TicTacToe games with optimized AI.
+//! A high-performance Rust backend for TicTacToe games with pluggable engines.
 //!
 //! This crate provides:
 //! - Efficient game state representation
 //! - Move validation and game logic
-//! - Optimized AI using minimax with alpha-beta pruning
+//! - Pluggable engine trait for custom move selection logic
+//! - Built-in perfect engine using minimax with alpha-beta pruning
 //! - Fast simulations for research and analysis
 //!
 //! ## Example
 //!
 //! ```
-//! use zttt_rs::{Board, Player, GameResult};
+//! use zttt_rs::{Board, Player, GameResult, PerfectEngine, Engine};
 //!
 //! let mut board = Board::new();
 //! board.make_move(0, 0, Player::X).unwrap();
 //! board.make_move(1, 1, Player::O).unwrap();
 //! 
-//! let best_move = board.best_move(Player::X);
+//! let engine = PerfectEngine::new();
+//! let best_move = engine.choose_move(&board, Player::X);
 //! println!("Best move: {:?}", best_move);
 //! ```
 
@@ -62,6 +64,110 @@ pub enum GameResult {
     Win(Player),
     Draw,
     InProgress,
+}
+
+/// Trait for implementing custom game engines
+///
+/// This trait allows you to implement different strategies for selecting moves.
+/// You can create engines with different algorithms, difficulty levels, or
+/// heuristics to suit your needs.
+pub trait Engine {
+    /// Choose the best move for the given player on the given board
+    ///
+    /// Returns `None` if no valid moves are available or the game is over.
+    fn choose_move(&self, board: &Board, player: Player) -> Option<(usize, usize)>;
+}
+
+/// A perfect play engine using minimax algorithm with alpha-beta pruning
+///
+/// This engine guarantees optimal play and will never lose when playing first.
+/// When both players use this engine, the game always results in a draw.
+#[derive(Debug, Clone, Copy)]
+pub struct PerfectEngine;
+
+impl PerfectEngine {
+    /// Creates a new perfect engine
+    pub fn new() -> Self {
+        PerfectEngine
+    }
+
+    /// Minimax algorithm with alpha-beta pruning
+    fn minimax(&self, board: &Board, maximizing_player: Player, current_player: Player, mut alpha: i32, mut beta: i32, is_maximizing: bool) -> i32 {
+        match board.game_result() {
+            GameResult::Win(player) => {
+                if player == maximizing_player {
+                    return 10;
+                } else {
+                    return -10;
+                }
+            }
+            GameResult::Draw => return 0,
+            GameResult::InProgress => {}
+        }
+
+        if is_maximizing {
+            let mut max_eval = i32::MIN;
+            for &(row, col) in &board.valid_moves() {
+                let mut new_board = board.clone();
+                new_board.cells[row][col] = Cell::Occupied(current_player);
+                let eval = self.minimax(&new_board, maximizing_player, current_player.opponent(), alpha, beta, false);
+                max_eval = max_eval.max(eval);
+                alpha = alpha.max(eval);
+                if beta <= alpha {
+                    break; // Beta cutoff
+                }
+            }
+            max_eval
+        } else {
+            let mut min_eval = i32::MAX;
+            for &(row, col) in &board.valid_moves() {
+                let mut new_board = board.clone();
+                new_board.cells[row][col] = Cell::Occupied(current_player);
+                let eval = self.minimax(&new_board, maximizing_player, current_player.opponent(), alpha, beta, true);
+                min_eval = min_eval.min(eval);
+                beta = beta.min(eval);
+                if beta <= alpha {
+                    break; // Alpha cutoff
+                }
+            }
+            min_eval
+        }
+    }
+}
+
+impl Default for PerfectEngine {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl Engine for PerfectEngine {
+    fn choose_move(&self, board: &Board, player: Player) -> Option<(usize, usize)> {
+        if board.game_result() != GameResult::InProgress {
+            return None;
+        }
+
+        let moves = board.valid_moves();
+        if moves.is_empty() {
+            return None;
+        }
+
+        let mut best_score = i32::MIN;
+        let mut best_move = moves[0];
+
+        for &(row, col) in &moves {
+            let mut new_board = board.clone();
+            new_board.cells[row][col] = Cell::Occupied(player);
+            let score = self.minimax(&new_board, player, player.opponent(), i32::MIN, i32::MAX, false);
+            
+            if score > best_score {
+                best_score = score;
+                best_move = (row, col);
+            }
+        }
+
+        Some(best_move)
+    }
 }
 
 /// The TicTacToe board
@@ -176,75 +282,21 @@ impl Board {
         }
     }
 
-    /// Finds the best move for the given player using minimax with alpha-beta pruning
-    pub fn best_move(&self, player: Player) -> Option<(usize, usize)> {
-        if self.game_result() != GameResult::InProgress {
-            return None;
-        }
-
-        let moves = self.valid_moves();
-        if moves.is_empty() {
-            return None;
-        }
-
-        let mut best_score = i32::MIN;
-        let mut best_move = moves[0];
-
-        for &(row, col) in &moves {
-            let mut new_board = self.clone();
-            new_board.cells[row][col] = Cell::Occupied(player);
-            let score = new_board.minimax(player, player.opponent(), i32::MIN, i32::MAX, false);
-            
-            if score > best_score {
-                best_score = score;
-                best_move = (row, col);
-            }
-        }
-
-        Some(best_move)
-    }
-
-    /// Minimax algorithm with alpha-beta pruning
-    fn minimax(&self, maximizing_player: Player, current_player: Player, mut alpha: i32, mut beta: i32, is_maximizing: bool) -> i32 {
-        match self.game_result() {
-            GameResult::Win(player) => {
-                if player == maximizing_player {
-                    return 10;
-                } else {
-                    return -10;
-                }
-            }
-            GameResult::Draw => return 0,
-            GameResult::InProgress => {}
-        }
-
-        if is_maximizing {
-            let mut max_eval = i32::MIN;
-            for &(row, col) in &self.valid_moves() {
-                let mut new_board = self.clone();
-                new_board.cells[row][col] = Cell::Occupied(current_player);
-                let eval = new_board.minimax(maximizing_player, current_player.opponent(), alpha, beta, false);
-                max_eval = max_eval.max(eval);
-                alpha = alpha.max(eval);
-                if beta <= alpha {
-                    break; // Beta cutoff
-                }
-            }
-            max_eval
-        } else {
-            let mut min_eval = i32::MAX;
-            for &(row, col) in &self.valid_moves() {
-                let mut new_board = self.clone();
-                new_board.cells[row][col] = Cell::Occupied(current_player);
-                let eval = new_board.minimax(maximizing_player, current_player.opponent(), alpha, beta, true);
-                min_eval = min_eval.min(eval);
-                beta = beta.min(eval);
-                if beta <= alpha {
-                    break; // Alpha cutoff
-                }
-            }
-            min_eval
-        }
+    /// Convenience method to find the best move using an engine
+    ///
+    /// This is a helper method that accepts any engine implementing the `Engine` trait.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use zttt_rs::{Board, Player, PerfectEngine};
+    ///
+    /// let board = Board::new();
+    /// let engine = PerfectEngine::new();
+    /// let best_move = board.choose_move(&engine, Player::X);
+    /// ```
+    pub fn choose_move(&self, engine: &impl Engine, player: Player) -> Option<(usize, usize)> {
+        engine.choose_move(self, player)
     }
 
     /// Resets the board to empty state
@@ -374,19 +426,20 @@ mod tests {
     }
 
     #[test]
-    fn test_best_move_blocks_win() {
+    fn test_engine_blocks_win() {
         let mut board = Board::new();
         // O has two in a row, X should block
         board.make_move(0, 0, Player::O).unwrap();
         board.make_move(1, 1, Player::X).unwrap();
         board.make_move(0, 1, Player::O).unwrap();
         
-        let best = board.best_move(Player::X);
+        let engine = PerfectEngine::new();
+        let best = engine.choose_move(&board, Player::X);
         assert_eq!(best, Some((0, 2))); // Block the win
     }
 
     #[test]
-    fn test_best_move_takes_win() {
+    fn test_engine_takes_win() {
         let mut board = Board::new();
         // X has two in a row, should take the win
         board.make_move(0, 0, Player::X).unwrap();
@@ -394,16 +447,29 @@ mod tests {
         board.make_move(0, 1, Player::X).unwrap();
         board.make_move(1, 1, Player::O).unwrap();
         
-        let best = board.best_move(Player::X);
+        let engine = PerfectEngine::new();
+        let best = engine.choose_move(&board, Player::X);
         assert_eq!(best, Some((0, 2))); // Take the win
     }
 
     #[test]
-    fn test_best_move_center() {
+    fn test_engine_center() {
         let mut board = Board::new();
         board.make_move(0, 0, Player::X).unwrap();
         
-        let best = board.best_move(Player::O);
+        let engine = PerfectEngine::new();
+        let best = engine.choose_move(&board, Player::O);
+        // Center is typically the best response
+        assert_eq!(best, Some((1, 1)));
+    }
+
+    #[test]
+    fn test_board_choose_move_convenience() {
+        let mut board = Board::new();
+        board.make_move(0, 0, Player::X).unwrap();
+        
+        let engine = PerfectEngine::new();
+        let best = board.choose_move(&engine, Player::O);
         // Center is typically the best response
         assert_eq!(best, Some((1, 1)));
     }

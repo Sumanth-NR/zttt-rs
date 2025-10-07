@@ -1,12 +1,13 @@
-use zttt_rs::{Board, Player, GameResult};
+use zttt_rs::{Board, Player, GameResult, PerfectEngine, Engine};
 use std::time::Instant;
 
 fn simulate_game() -> GameResult {
     let mut board = Board::new();
     let mut current_player = Player::X;
+    let engine = PerfectEngine::new();
     
     while board.game_result() == GameResult::InProgress {
-        if let Some((row, col)) = board.best_move(current_player) {
+        if let Some((row, col)) = engine.choose_move(&board, current_player) {
             board.make_move(row, col, current_player).unwrap();
             current_player = current_player.opponent();
         }
@@ -62,14 +63,16 @@ fn main() {
     println!("1M move generations: {}ms", duration.as_millis());
     println!("Average: {:.2}ns per generation", duration.as_nanos() as f64 / 1_000_000.0);
     
-    // Benchmark best move calculation at various positions
-    println!("\nBenchmarking best move calculation...");
+    // Benchmark engine move calculation at various positions
+    println!("\nBenchmarking engine move calculation...");
+    
+    let engine = PerfectEngine::new();
     
     // Empty board (most expensive)
     let board = Board::new();
     let start = Instant::now();
     for _ in 0..100 {
-        let _ = board.best_move(Player::X);
+        let _ = engine.choose_move(&board, Player::X);
     }
     let duration = start.elapsed();
     println!("Empty board (100 iterations): {}ms", duration.as_millis());
@@ -82,7 +85,7 @@ fn main() {
     board.make_move(0, 1, Player::X).unwrap();
     let start = Instant::now();
     for _ in 0..1000 {
-        let _ = board.best_move(Player::O);
+        let _ = engine.choose_move(&board, Player::O);
     }
     let duration = start.elapsed();
     println!("Mid-game position (1000 iterations): {}ms", duration.as_millis());

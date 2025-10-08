@@ -43,11 +43,7 @@ See the [examples](examples/) directory for more usage patterns.
 
 ## Documentation
 
-- **API Documentation**: [docs.rs/zttt-rs](https://docs.rs/zttt-rs)
-- **Architecture**: [.github/ARCHITECTURE.md](.github/ARCHITECTURE.md)
-- **Contributing**: [.github/CONTRIBUTING.md](.github/CONTRIBUTING.md)
-- **Development Guide**: [.github/DEVELOPMENT.md](.github/DEVELOPMENT.md)
-- **AI Conventions**: [.github/AI_CONVENTIONS.md](.github/AI_CONVENTIONS.md)
+Full API documentation is available at [docs.rs/zttt-rs](https://docs.rs/zttt-rs)
 
 ## Development
 
@@ -67,12 +63,6 @@ cargo build --release
 # Run examples
 cargo run --example ai_game
 ```
-
-See [CONTRIBUTING.md](.github/CONTRIBUTING.md) for detailed development guidelines.
-
-## Contributing
-
-Contributions are welcome! Please read our [Contributing Guide](.github/CONTRIBUTING.md) and [Code of Conduct](.github/CODE_OF_CONDUCT.md).
 
 ## License
 

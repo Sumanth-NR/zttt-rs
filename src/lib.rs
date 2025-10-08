@@ -8,6 +8,17 @@
 //! - Pluggable engine trait for custom move selection logic
 //! - Built-in perfect engine using minimax with alpha-beta pruning
 //! - Fast simulations for research and analysis
+//! - `ValidatedBoard` for performance-critical operations without repeated bounds checking
+//!
+//! ## Board vs ValidatedBoard
+//!
+//! The crate provides two board types:
+//!
+//! - **`Board`**: The standard board with full validation on all operations. Use this for
+//!   normal game play where safety is paramount.
+//! - **`ValidatedBoard`**: A performance-optimized board that provides unchecked operations
+//!   for use in hot paths like minimax search. Use this when you can guarantee that all
+//!   coordinates are valid (0..3).
 //!
 //! ## Example
 //!
@@ -22,6 +33,20 @@
 //! let best_move = engine.choose_move(&board, Player::X);
 //! println!("Best move: {:?}", best_move);
 //! ```
+//!
+//! ## Performance Example with ValidatedBoard
+//!
+//! ```
+//! use zttt_rs::{ValidatedBoard, Player, Cell};
+//!
+//! let mut board = ValidatedBoard::default();
+//! // When you know coordinates are valid (0..3), use unchecked operations
+//! unsafe {
+//!     board.make_move_unchecked(0, 0, Player::X);
+//!     board.make_move_unchecked(1, 1, Player::O);
+//! }
+//! println!("Board: {}", board);
+//! ```
 
 mod player;
 mod game;
@@ -31,7 +56,7 @@ mod engine;
 // Re-export public API
 pub use player::{Player, Cell};
 pub use game::GameResult;
-pub use board::Board;
+pub use board::{Board, ValidatedBoard};
 pub use engine::{Engine, PerfectEngine};
 
 #[cfg(test)]
@@ -215,5 +240,100 @@ mod tests {
         
         assert_eq!(board.game_result(), GameResult::Win(Player::X));
         assert!(board.make_move(2, 2, Player::O).is_err());
+    }
+
+    #[test]
+    fn test_validated_board_from_board() {
+        let mut board = Board::new();
+        board.make_move(0, 0, Player::X).unwrap();
+        board.make_move(1, 1, Player::O).unwrap();
+
+        let validated = ValidatedBoard::from_board(board.clone());
+        assert_eq!(validated.get(0, 0), Some(Cell::Occupied(Player::X)));
+        assert_eq!(validated.get(1, 1), Some(Cell::Occupied(Player::O)));
+        assert_eq!(validated.get(2, 2), Some(Cell::Empty));
+    }
+
+    #[test]
+    fn test_validated_board_to_board() {
+        let mut board = Board::new();
+        board.make_move(0, 0, Player::X).unwrap();
+
+        let validated = ValidatedBoard::from_board(board.clone());
+        let back_to_board = validated.to_board();
+        assert_eq!(back_to_board, board);
+    }
+
+    #[test]
+    fn test_validated_board_set() {
+        let mut validated = ValidatedBoard::default();
+        assert!(validated.set(0, 0, Cell::Occupied(Player::X)).is_ok());
+        assert_eq!(validated.get(0, 0), Some(Cell::Occupied(Player::X)));
+    }
+
+    #[test]
+    fn test_validated_board_set_out_of_bounds() {
+        let mut validated = ValidatedBoard::default();
+        assert!(validated.set(3, 3, Cell::Occupied(Player::X)).is_err());
+    }
+
+    #[test]
+    fn test_validated_board_get_out_of_bounds() {
+        let validated = ValidatedBoard::default();
+        assert_eq!(validated.get(3, 3), None);
+    }
+
+    #[test]
+    fn test_validated_board_unchecked() {
+        let mut validated = ValidatedBoard::default();
+        unsafe {
+            validated.make_move_unchecked(0, 0, Player::X);
+            assert_eq!(validated.get_unchecked(0, 0), Cell::Occupied(Player::X));
+        }
+    }
+
+    #[test]
+    fn test_validated_board_game_result() {
+        let mut validated = ValidatedBoard::default();
+        unsafe {
+            validated.make_move_unchecked(0, 0, Player::X);
+            validated.make_move_unchecked(0, 1, Player::X);
+            validated.make_move_unchecked(0, 2, Player::X);
+        }
+        assert_eq!(validated.game_result(), GameResult::Win(Player::X));
+    }
+
+    #[test]
+    fn test_validated_board_valid_moves() {
+        let mut validated = ValidatedBoard::default();
+        assert_eq!(validated.valid_moves().len(), 9);
+        
+        unsafe {
+            validated.make_move_unchecked(0, 0, Player::X);
+        }
+        assert_eq!(validated.valid_moves().len(), 8);
+    }
+
+    #[test]
+    fn test_validated_board_display() {
+        let mut validated = ValidatedBoard::default();
+        unsafe {
+            validated.make_move_unchecked(0, 0, Player::X);
+            validated.make_move_unchecked(1, 1, Player::O);
+        }
+        let display = format!("{}", validated);
+        assert!(display.contains("X"));
+        assert!(display.contains("O"));
+        assert!(display.contains("."));
+    }
+
+    #[test]
+    fn test_validated_board_as_board() {
+        let mut board = Board::new();
+        board.make_move(0, 0, Player::X).unwrap();
+        
+        let validated = ValidatedBoard::from_board(board.clone());
+        let board_ref = validated.as_board();
+        assert_eq!(board_ref.get(0, 0), Some(Cell::Occupied(Player::X)));
     }
 }

@@ -1,7 +1,7 @@
 //! Engine trait and implementations for move selection
 
-use crate::board::Board;
-use crate::player::{Player, Cell};
+use crate::board::{Board, ValidatedBoard};
+use crate::player::Player;
 use crate::game::GameResult;
 
 /// Trait for implementing custom game engines
@@ -29,8 +29,8 @@ impl PerfectEngine {
         PerfectEngine
     }
 
-    /// Minimax algorithm with alpha-beta pruning
-    fn minimax(&self, board: &Board, maximizing_player: Player, current_player: Player, mut alpha: i32, mut beta: i32, is_maximizing: bool) -> i32 {
+    /// Minimax algorithm with alpha-beta pruning using ValidatedBoard for performance
+    fn minimax(&self, board: &ValidatedBoard, maximizing_player: Player, current_player: Player, mut alpha: i32, mut beta: i32, is_maximizing: bool) -> i32 {
         match board.game_result() {
             GameResult::Win(player) => {
                 if player == maximizing_player {
@@ -47,7 +47,10 @@ impl PerfectEngine {
             let mut max_eval = i32::MIN;
             for &(row, col) in &board.valid_moves() {
                 let mut new_board = board.clone();
-                new_board.cells[row][col] = Cell::Occupied(current_player);
+                // SAFETY: valid_moves() only returns positions within bounds (0..3)
+                unsafe {
+                    new_board.make_move_unchecked(row, col, current_player);
+                }
                 let eval = self.minimax(&new_board, maximizing_player, current_player.opponent(), alpha, beta, false);
                 max_eval = max_eval.max(eval);
                 alpha = alpha.max(eval);
@@ -60,7 +63,10 @@ impl PerfectEngine {
             let mut min_eval = i32::MAX;
             for &(row, col) in &board.valid_moves() {
                 let mut new_board = board.clone();
-                new_board.cells[row][col] = Cell::Occupied(current_player);
+                // SAFETY: valid_moves() only returns positions within bounds (0..3)
+                unsafe {
+                    new_board.make_move_unchecked(row, col, current_player);
+                }
                 let eval = self.minimax(&new_board, maximizing_player, current_player.opponent(), alpha, beta, true);
                 min_eval = min_eval.min(eval);
                 beta = beta.min(eval);
@@ -90,12 +96,18 @@ impl Engine for PerfectEngine {
             return None;
         }
 
+        // Convert to ValidatedBoard for performance in minimax
+        let validated_board = ValidatedBoard::from_board(board.clone());
+
         let mut best_score = i32::MIN;
         let mut best_move = moves[0];
 
         for &(row, col) in &moves {
-            let mut new_board = board.clone();
-            new_board.cells[row][col] = Cell::Occupied(player);
+            let mut new_board = validated_board.clone();
+            // SAFETY: valid_moves() only returns positions within bounds (0..3)
+            unsafe {
+                new_board.make_move_unchecked(row, col, player);
+            }
             let score = self.minimax(&new_board, player, player.opponent(), i32::MIN, i32::MAX, false);
             
             if score > best_score {

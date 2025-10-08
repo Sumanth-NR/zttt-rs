@@ -1,9 +1,9 @@
 //! Board representation and game logic
 
-use std::fmt;
-use crate::player::{Player, Cell};
-use crate::game::GameResult;
 use crate::engine::Engine;
+use crate::game::GameResult;
+use crate::player::{Cell, Player};
+use std::fmt;
 
 /// The TicTacToe board
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -29,7 +29,12 @@ impl Board {
     }
 
     /// Makes a move on the board
-    pub fn make_move(&mut self, row: usize, col: usize, player: Player) -> Result<(), &'static str> {
+    pub fn make_move(
+        &mut self,
+        row: usize,
+        col: usize,
+        player: Player,
+    ) -> Result<(), &'static str> {
         if row >= 3 || col >= 3 {
             return Err("Position out of bounds");
         }
@@ -48,7 +53,10 @@ impl Board {
 
     /// Checks if a move is valid
     pub fn is_valid_move(&self, row: usize, col: usize) -> bool {
-        row < 3 && col < 3 && self.cells[row][col] == Cell::Empty && self.game_result() == GameResult::InProgress
+        row < 3
+            && col < 3
+            && self.cells[row][col] == Cell::Empty
+            && self.game_result() == GameResult::InProgress
     }
 
     /// Gets all valid moves
@@ -57,7 +65,7 @@ impl Board {
         if self.game_result() != GameResult::InProgress {
             return moves;
         }
-        
+
         for row in 0..3 {
             for col in 0..3 {
                 if self.cells[row][col] == Cell::Empty {
@@ -73,8 +81,9 @@ impl Board {
         // Check rows
         for row in 0..3 {
             if let Cell::Occupied(player) = self.cells[row][0] {
-                if self.cells[row][1] == Cell::Occupied(player) 
-                    && self.cells[row][2] == Cell::Occupied(player) {
+                if self.cells[row][1] == Cell::Occupied(player)
+                    && self.cells[row][2] == Cell::Occupied(player)
+                {
                     return GameResult::Win(player);
                 }
             }
@@ -83,8 +92,9 @@ impl Board {
         // Check columns
         for col in 0..3 {
             if let Cell::Occupied(player) = self.cells[0][col] {
-                if self.cells[1][col] == Cell::Occupied(player) 
-                    && self.cells[2][col] == Cell::Occupied(player) {
+                if self.cells[1][col] == Cell::Occupied(player)
+                    && self.cells[2][col] == Cell::Occupied(player)
+                {
                     return GameResult::Win(player);
                 }
             }
@@ -92,21 +102,25 @@ impl Board {
 
         // Check diagonals
         if let Cell::Occupied(player) = self.cells[0][0] {
-            if self.cells[1][1] == Cell::Occupied(player) 
-                && self.cells[2][2] == Cell::Occupied(player) {
+            if self.cells[1][1] == Cell::Occupied(player)
+                && self.cells[2][2] == Cell::Occupied(player)
+            {
                 return GameResult::Win(player);
             }
         }
 
         if let Cell::Occupied(player) = self.cells[0][2] {
-            if self.cells[1][1] == Cell::Occupied(player) 
-                && self.cells[2][0] == Cell::Occupied(player) {
+            if self.cells[1][1] == Cell::Occupied(player)
+                && self.cells[2][0] == Cell::Occupied(player)
+            {
                 return GameResult::Win(player);
             }
         }
 
         // Check for draw
-        let has_empty = self.cells.iter()
+        let has_empty = self
+            .cells
+            .iter()
             .flat_map(|row| row.iter())
             .any(|&cell| cell == Cell::Empty);
 

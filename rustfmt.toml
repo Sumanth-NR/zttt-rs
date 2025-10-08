@@ -1,0 +1,38 @@
+# Rust code formatting configuration (stable features only)
+# See https://rust-lang.github.io/rustfmt/
+
+# Edition for parsing code
+edition = "2021"
+
+# Maximum width of each line
+max_width = 100
+
+# Maximum width of the args of a function call before falling back to vertical formatting
+fn_call_width = 80
+
+# Maximum width of the args of a function-like attributes before falling back to vertical formatting
+attr_fn_like_width = 70
+
+# Maximum width in the body of a struct lit before falling back to vertical formatting
+struct_lit_width = 18
+
+# Maximum width in the body of a struct variant before falling back to vertical formatting
+struct_variant_width = 35
+
+# Maximum width of an array literal before falling back to vertical formatting
+array_width = 80
+
+# Maximum width of a chain to fit on a single line
+chain_width = 60
+
+# Reorder import and extern crate statements alphabetically
+reorder_imports = true
+
+# Reorder mod declarations alphabetically
+reorder_modules = true
+
+# Use field init shorthand if possible
+use_field_init_shorthand = true
+
+# Use try shorthand
+use_try_shorthand = true

@@ -17,22 +17,22 @@
 //! let mut board = Board::new();
 //! board.make_move(0, 0, Player::X).unwrap();
 //! board.make_move(1, 1, Player::O).unwrap();
-//! 
+//!
 //! let engine = PerfectEngine::new();
 //! let best_move = engine.choose_move(&board, Player::X);
 //! println!("Best move: {:?}", best_move);
 //! ```
 
-mod player;
-mod game;
 mod board;
 mod engine;
+mod game;
+mod player;
 
 // Re-export public API
-pub use player::{Player, Cell};
-pub use game::GameResult;
 pub use board::Board;
 pub use engine::{Engine, PerfectEngine};
+pub use game::GameResult;
+pub use player::{Cell, Player};
 
 #[cfg(test)]
 mod tests {
@@ -135,7 +135,7 @@ mod tests {
         board.make_move(0, 0, Player::O).unwrap();
         board.make_move(1, 1, Player::X).unwrap();
         board.make_move(0, 1, Player::O).unwrap();
-        
+
         let engine = PerfectEngine::new();
         let best = engine.choose_move(&board, Player::X);
         assert_eq!(best, Some((0, 2))); // Block the win
@@ -149,7 +149,7 @@ mod tests {
         board.make_move(1, 0, Player::O).unwrap();
         board.make_move(0, 1, Player::X).unwrap();
         board.make_move(1, 1, Player::O).unwrap();
-        
+
         let engine = PerfectEngine::new();
         let best = engine.choose_move(&board, Player::X);
         assert_eq!(best, Some((0, 2))); // Take the win
@@ -159,7 +159,7 @@ mod tests {
     fn test_engine_center() {
         let mut board = Board::new();
         board.make_move(0, 0, Player::X).unwrap();
-        
+
         let engine = PerfectEngine::new();
         let best = engine.choose_move(&board, Player::O);
         // Center is typically the best response
@@ -170,7 +170,7 @@ mod tests {
     fn test_board_choose_move_convenience() {
         let mut board = Board::new();
         board.make_move(0, 0, Player::X).unwrap();
-        
+
         let engine = PerfectEngine::new();
         let best = board.choose_move(&engine, Player::O);
         // Center is typically the best response
@@ -212,7 +212,7 @@ mod tests {
         board.make_move(0, 1, Player::X).unwrap();
         board.make_move(1, 1, Player::O).unwrap();
         board.make_move(0, 2, Player::X).unwrap();
-        
+
         assert_eq!(board.game_result(), GameResult::Win(Player::X));
         assert!(board.make_move(2, 2, Player::O).is_err());
     }

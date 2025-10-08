@@ -1,0 +1,29 @@
+# Clippy configuration
+# See https://doc.rust-lang.org/clippy/
+
+# Avoid false positives for this lint in test code
+cognitive-complexity-threshold = 30
+
+# Maximum number of single char bindings a scope may have
+single-char-binding-names-threshold = 4
+
+# Maximum size of types to be passed by value
+trivial-copy-size-limit = 128
+
+# Minimum size of types to suggest using a boxed ref instead
+pass-by-value-size-limit = 256
+
+# Maximum number of lines for a function or method
+too-many-lines-threshold = 100
+
+# Maximum number of arguments for a function or method
+too-many-arguments-threshold = 7
+
+# Maximum number of struct fields for a type
+type-complexity-threshold = 250
+
+# Minimum number of array elements to suggest using vec![]
+array-size-threshold = 512_000
+
+# Minimum rust version
+msrv = "1.90.0"

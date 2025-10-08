@@ -1,8 +1,8 @@
 //! Engine trait and implementations for move selection
 
 use crate::board::Board;
-use crate::player::{Player, Cell};
 use crate::game::GameResult;
+use crate::player::{Cell, Player};
 
 /// Trait for implementing custom game engines
 ///
@@ -30,7 +30,15 @@ impl PerfectEngine {
     }
 
     /// Minimax algorithm with alpha-beta pruning
-    fn minimax(&self, board: &Board, maximizing_player: Player, current_player: Player, mut alpha: i32, mut beta: i32, is_maximizing: bool) -> i32 {
+    fn minimax(
+        &self,
+        board: &Board,
+        maximizing_player: Player,
+        current_player: Player,
+        mut alpha: i32,
+        mut beta: i32,
+        is_maximizing: bool,
+    ) -> i32 {
         match board.game_result() {
             GameResult::Win(player) => {
                 if player == maximizing_player {
@@ -48,7 +56,14 @@ impl PerfectEngine {
             for &(row, col) in &board.valid_moves() {
                 let mut new_board = board.clone();
                 new_board.cells[row][col] = Cell::Occupied(current_player);
-                let eval = self.minimax(&new_board, maximizing_player, current_player.opponent(), alpha, beta, false);
+                let eval = self.minimax(
+                    &new_board,
+                    maximizing_player,
+                    current_player.opponent(),
+                    alpha,
+                    beta,
+                    false,
+                );
                 max_eval = max_eval.max(eval);
                 alpha = alpha.max(eval);
                 if beta <= alpha {
@@ -61,7 +76,14 @@ impl PerfectEngine {
             for &(row, col) in &board.valid_moves() {
                 let mut new_board = board.clone();
                 new_board.cells[row][col] = Cell::Occupied(current_player);
-                let eval = self.minimax(&new_board, maximizing_player, current_player.opponent(), alpha, beta, true);
+                let eval = self.minimax(
+                    &new_board,
+                    maximizing_player,
+                    current_player.opponent(),
+                    alpha,
+                    beta,
+                    true,
+                );
                 min_eval = min_eval.min(eval);
                 beta = beta.min(eval);
                 if beta <= alpha {
@@ -96,8 +118,9 @@ impl Engine for PerfectEngine {
         for &(row, col) in &moves {
             let mut new_board = board.clone();
             new_board.cells[row][col] = Cell::Occupied(player);
-            let score = self.minimax(&new_board, player, player.opponent(), i32::MIN, i32::MAX, false);
-            
+            let score =
+                self.minimax(&new_board, player, player.opponent(), i32::MIN, i32::MAX, false);
+
             if score > best_score {
                 best_score = score;
                 best_move = (row, col);

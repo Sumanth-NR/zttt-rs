@@ -51,11 +51,17 @@ Full API documentation is available at [docs.rs/zttt-rs](https://docs.rs/zttt-rs
 # Run tests
 cargo test
 
+# Format code
+cargo fmt
+
+# Run linter
+cargo clippy
+
 # Build release
 cargo build --release
 
-# Run benchmarks
-cargo bench
+# Run examples
+cargo run --example ai_game
 ```
 
 ## License

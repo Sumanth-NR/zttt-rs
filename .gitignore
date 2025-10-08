@@ -1,1 +1,31 @@
+# Cargo build artifacts
 /target
+Cargo.lock
+
+# Backup files
+*~
+*.swp
+*.swo
+*~
+
+# IDE/Editor files
+.vscode/
+.idea/
+*.iml
+.DS_Store
+
+# Testing and coverage
+*.profraw
+*.profdata
+tarpaulin-report.html
+cobertura.xml
+
+# Documentation build
+/doc
+
+# Temporary files
+/tmp
+*.tmp
+
+# Rust analyzer
+rust-project.json

@@ -3,14 +3,15 @@
 [![Rust](https://img.shields.io/badge/rust-1.90%2B-orange.svg)](https://www.rust-lang.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-A high-performance TicTacToe engine in Rust with perfect play using minimax with alpha-beta pruning.
+The fastest and most optimized Rust backend for simulating TicTacToe games.
 
 ## Features
 
-- **Perfect Play Engine**: Minimax algorithm with alpha-beta pruning for optimal moves
-- **Fast Performance**: ~1.6ms per game, ~614 games/second
-- **Simple API**: Easy-to-use board and engine interface
-- **Pluggable Architecture**: Implement custom engines via the `Engine` trait
+- **Blazing Fast Simulations**: ~1.6ms per game, ~614 games/second - optimized for high-throughput game simulations
+- **Efficient Game State**: Minimal memory footprint with optimized board representation
+- **Perfect Play Engine**: Built-in minimax algorithm with alpha-beta pruning for optimal AI moves
+- **Pluggable Architecture**: Implement custom engines via the `Engine` trait for research and experimentation
+- **Simple API**: Clean, easy-to-use interface designed for fast integration
 
 ## Installation
 

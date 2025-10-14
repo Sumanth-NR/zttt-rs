@@ -7,11 +7,12 @@ The fastest and most optimized Rust backend for simulating TicTacToe games.
 
 ## Features
 
-- **Blazing Fast Simulations**: ~1.6ms per game, ~614 games/second - optimized for high-throughput game simulations
+- **Blazing Fast Simulations**: Optimized for maximum throughput - over 1.8M games/second with FastEngine
 - **Efficient Game State**: Minimal memory footprint with optimized board representation
-- **Perfect Play Engine**: Built-in minimax algorithm with alpha-beta pruning for optimal AI moves
+- **High-Speed Engine**: FastEngine for ultra-fast simulations (0.55µs per game)
 - **Pluggable Architecture**: Implement custom engines via the `Engine` trait for research and experimentation
 - **Simple API**: Clean, easy-to-use interface designed for fast integration
+- **Benchmark Reference**: PerfectEngine with minimax/alpha-beta pruning available in examples for comparison
 
 ## Installation
 
@@ -22,21 +23,39 @@ cargo add zttt-rs
 ## Quick Start
 
 ```rust
-use zttt_rs::{Board, Player, PerfectEngine, Engine};
+use zttt_rs::{Board, Player, FastEngine, Engine};
 
 fn main() {
     let mut board = Board::new();
-    let engine = PerfectEngine::new();
+    let engine = FastEngine;
     
     // Make a move
     board.make_move(0, 0, Player::X).unwrap();
     
-    // Get the best move for O
+    // Get next move for O
     if let Some((row, col)) = engine.choose_move(&board, Player::O) {
         board.make_move(row, col, Player::O).unwrap();
     }
     
     println!("{}", board);
+}
+```
+
+### High-Speed Simulation Example
+
+```rust
+use zttt_rs::{Board, Player, GameResult, FastEngine, Engine};
+
+// Simulate a complete game in ~0.55µs
+let mut board = Board::new();
+let mut current_player = Player::X;
+let engine = FastEngine;
+
+while board.game_result() == GameResult::InProgress {
+    if let Some((row, col)) = engine.choose_move(&board, current_player) {
+        board.make_move(row, col, current_player).unwrap();
+        current_player = current_player.opponent();
+    }
 }
 ```
 
@@ -55,8 +74,11 @@ cargo test
 # Build release
 cargo build --release
 
-# Run benchmarks
-cargo bench
+# Run fast simulation example
+cargo run --example fast_simulation --release
+
+# Run benchmark (includes PerfectEngine for comparison)
+cargo run --example benchmark --release
 ```
 
 ## Contributing

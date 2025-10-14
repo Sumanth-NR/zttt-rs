@@ -3,24 +3,24 @@
 //! The fastest and most optimized Rust backend for simulating TicTacToe games.
 //!
 //! This crate provides:
-//! - **Blazing fast game simulations**: Optimized for high-throughput scenarios (~614 games/second)
+//! - **Blazing fast game simulations**: Optimized for high-throughput scenarios
 //! - **Efficient game state representation**: Minimal memory footprint for large-scale simulations
 //! - **Move validation and game logic**: Fast and reliable core game mechanics
-//! - **Pluggable engine trait**: Implement custom move selection logic for research and experimentation
-//! - **Built-in perfect engine**: Minimax algorithm with alpha-beta pruning for optimal AI moves
+//! - **Pluggable engine trait**: Implement custom move selection logic for different use cases
+//! - **High-speed engine**: FastEngine for maximum throughput in simulations
 //!
 //! ## Example
 //!
 //! ```
-//! use zttt_rs::{Board, Player, GameResult, PerfectEngine, Engine};
+//! use zttt_rs::{Board, Player, GameResult, FastEngine, Engine};
 //!
 //! let mut board = Board::new();
 //! board.make_move(0, 0, Player::X).unwrap();
 //! board.make_move(1, 1, Player::O).unwrap();
 //! 
-//! let engine = PerfectEngine::new();
-//! let best_move = engine.choose_move(&board, Player::X);
-//! println!("Best move: {:?}", best_move);
+//! let engine = FastEngine;
+//! let next_move = engine.choose_move(&board, Player::X);
+//! println!("Next move: {:?}", next_move);
 //! ```
 
 mod player;
@@ -32,7 +32,7 @@ mod engine;
 pub use player::{Player, Cell};
 pub use game::GameResult;
 pub use board::Board;
-pub use engine::{Engine, PerfectEngine};
+pub use engine::{Engine, FastEngine};
 
 #[cfg(test)]
 mod tests {
@@ -129,41 +129,32 @@ mod tests {
     }
 
     #[test]
-    fn test_engine_blocks_win() {
+    fn test_engine_returns_valid_move() {
         let mut board = Board::new();
-        // O has two in a row, X should block
         board.make_move(0, 0, Player::O).unwrap();
         board.make_move(1, 1, Player::X).unwrap();
-        board.make_move(0, 1, Player::O).unwrap();
         
-        let engine = PerfectEngine::new();
-        let best = engine.choose_move(&board, Player::X);
-        assert_eq!(best, Some((0, 2))); // Block the win
+        let engine = FastEngine;
+        let chosen = engine.choose_move(&board, Player::X);
+        assert!(chosen.is_some());
+        let (row, col) = chosen.unwrap();
+        assert!(board.is_valid_move(row, col));
     }
 
     #[test]
-    fn test_engine_takes_win() {
+    fn test_engine_returns_none_when_game_over() {
         let mut board = Board::new();
-        // X has two in a row, should take the win
         board.make_move(0, 0, Player::X).unwrap();
         board.make_move(1, 0, Player::O).unwrap();
         board.make_move(0, 1, Player::X).unwrap();
         board.make_move(1, 1, Player::O).unwrap();
+        board.make_move(0, 2, Player::X).unwrap();
         
-        let engine = PerfectEngine::new();
-        let best = engine.choose_move(&board, Player::X);
-        assert_eq!(best, Some((0, 2))); // Take the win
-    }
-
-    #[test]
-    fn test_engine_center() {
-        let mut board = Board::new();
-        board.make_move(0, 0, Player::X).unwrap();
+        assert_eq!(board.game_result(), GameResult::Win(Player::X));
         
-        let engine = PerfectEngine::new();
-        let best = engine.choose_move(&board, Player::O);
-        // Center is typically the best response
-        assert_eq!(best, Some((1, 1)));
+        let engine = FastEngine;
+        let chosen = engine.choose_move(&board, Player::O);
+        assert!(chosen.is_none());
     }
 
     #[test]
@@ -171,10 +162,9 @@ mod tests {
         let mut board = Board::new();
         board.make_move(0, 0, Player::X).unwrap();
         
-        let engine = PerfectEngine::new();
-        let best = board.choose_move(&engine, Player::O);
-        // Center is typically the best response
-        assert_eq!(best, Some((1, 1)));
+        let engine = FastEngine;
+        let chosen = board.choose_move(&engine, Player::O);
+        assert!(chosen.is_some());
     }
 
     #[test]

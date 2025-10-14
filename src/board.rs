@@ -117,18 +117,18 @@ impl Board {
         }
     }
 
-    /// Convenience method to find the best move using an engine
+    /// Convenience method to select a move using an engine
     ///
     /// This is a helper method that accepts any engine implementing the `Engine` trait.
     ///
     /// # Example
     ///
     /// ```
-    /// use zttt_rs::{Board, Player, PerfectEngine};
+    /// use zttt_rs::{Board, Player, FastEngine};
     ///
     /// let board = Board::new();
-    /// let engine = PerfectEngine::new();
-    /// let best_move = board.choose_move(&engine, Player::X);
+    /// let engine = FastEngine;
+    /// let next_move = board.choose_move(&engine, Player::X);
     /// ```
     pub fn choose_move(&self, engine: &impl Engine, player: Player) -> Option<(usize, usize)> {
         engine.choose_move(self, player)

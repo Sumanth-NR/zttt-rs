@@ -1,16 +1,28 @@
-use zttt_rs::{Board, Player, GameResult, Engine};
-use std::time::Instant;
+//! Perfect play engine using minimax with alpha-beta pruning
+//!
+//! This engine is kept as a benchmark reference for optimal play.
+//! It uses the minimax algorithm with alpha-beta pruning to guarantee
+//! perfect play but is slower than simple engines.
+
+use zttt_rs::{Board, Player, Engine, GameResult};
 
 /// A perfect play engine using minimax algorithm with alpha-beta pruning
-/// (Included here for benchmarking purposes)
+///
+/// This engine guarantees optimal play and will never lose when playing first.
+/// When both players use this engine, the game always results in a draw.
+///
+/// **Note**: This engine is provided as a benchmark reference. For high-speed
+/// simulations, consider using simpler engines like `FastEngine`.
 #[derive(Debug, Clone, Copy)]
-struct PerfectEngine;
+pub struct PerfectEngine;
 
 impl PerfectEngine {
-    fn new() -> Self {
+    /// Creates a new perfect engine
+    pub fn new() -> Self {
         PerfectEngine
     }
 
+    /// Minimax algorithm with alpha-beta pruning
     fn minimax(&self, board: &Board, maximizing_player: Player, current_player: Player, mut alpha: i32, mut beta: i32, is_maximizing: bool) -> i32 {
         match board.game_result() {
             GameResult::Win(player) => {
@@ -33,7 +45,7 @@ impl PerfectEngine {
                 max_eval = max_eval.max(eval);
                 alpha = alpha.max(eval);
                 if beta <= alpha {
-                    break;
+                    break; // Beta cutoff
                 }
             }
             max_eval
@@ -46,11 +58,17 @@ impl PerfectEngine {
                 min_eval = min_eval.min(eval);
                 beta = beta.min(eval);
                 if beta <= alpha {
-                    break;
+                    break; // Alpha cutoff
                 }
             }
             min_eval
         }
+    }
+}
+
+impl Default for PerfectEngine {
+    fn default() -> Self {
+        Self::new()
     }
 }
 
@@ -83,49 +101,7 @@ impl Engine for PerfectEngine {
     }
 }
 
-fn simulate_game() -> GameResult {
-    let mut board = Board::new();
-    let mut current_player = Player::X;
-    let engine = PerfectEngine::new();
-    
-    while board.game_result() == GameResult::InProgress {
-        if let Some((row, col)) = engine.choose_move(&board, current_player) {
-            board.make_move(row, col, current_player).unwrap();
-            current_player = current_player.opponent();
-        }
-    }
-    
-    board.game_result()
-}
-
 fn main() {
-    println!("=== Running Multiple TicTacToe Simulations ===\n");
-    
-    let num_games = 10_000;
-    
-    let start = Instant::now();
-    
-    let mut wins_x = 0;
-    let mut wins_o = 0;
-    let mut draws = 0;
-    
-    for _ in 0..num_games {
-        match simulate_game() {
-            GameResult::Win(Player::X) => wins_x += 1,
-            GameResult::Win(Player::O) => wins_o += 1,
-            GameResult::Draw => draws += 1,
-            _ => {}
-        }
-    }
-    
-    let duration = start.elapsed();
-    
-    println!("Completed {} games in {:?}", num_games, duration);
-    println!("Average time per game: {:.2}µs", duration.as_micros() as f64 / num_games as f64);
-    println!("\nResults:");
-    println!("X wins: {} ({:.2}%)", wins_x, (wins_x as f64 / num_games as f64) * 100.0);
-    println!("O wins: {} ({:.2}%)", wins_o, (wins_o as f64 / num_games as f64) * 100.0);
-    println!("Draws:  {} ({:.2}%)", draws, (draws as f64 / num_games as f64) * 100.0);
-    
-    println!("\nNote: When both players play optimally, the result is always a draw!");
+    println!("PerfectEngine is available as a module for benchmarking.");
+    println!("Use this engine to compare performance against simpler engines.");
 }

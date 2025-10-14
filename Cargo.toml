@@ -3,11 +3,11 @@ name = "zttt-rs"
 version = "0.1.0"
 edition = "2021"
 authors = ["Sumanth-NR"]
-description = "A high-performance Rust backend for TicTacToe games with optimized AI"
+description = "The fastest and most optimized Rust backend for simulating TicTacToe games"
 license = "MIT"
 repository = "https://github.com/Sumanth-NR/zttt-rs"
-keywords = ["tictactoe", "game", "ai", "minimax"]
-categories = ["games", "algorithms"]
+keywords = ["tictactoe", "game", "simulation", "performance", "backend"]
+categories = ["games", "algorithms", "simulation"]
 
 [dependencies]
 

@@ -59,6 +59,13 @@ cargo build --release
 cargo bench
 ```
 
+## Contributing
+
+When contributing to this repository, please:
+- Keep the vision in mind: **fastest and most optimized simulation backend**
+- Update [.ai-context.md](.ai-context.md) if you make significant changes to structure, API, or performance
+- See [.github/copilot-instructions.md](.github/copilot-instructions.md) for detailed guidelines
+
 ## License
 
 MIT License - see [LICENSE](LICENSE) for details

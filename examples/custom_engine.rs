@@ -2,7 +2,7 @@
 ///
 /// This shows the clean separation between game logic (Board) and move selection (Engine)
 
-use zttt_rs::{Board, Player, GameResult, Engine};
+use zttt_rs::backend::{Board, Player, GameResult, Engine};
 
 /// A custom engine that picks moves based on priority positions
 ///

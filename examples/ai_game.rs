@@ -1,4 +1,4 @@
-use zttt_rs::{Board, Player, GameResult, Engine};
+use zttt_rs::backend::{Board, Player, GameResult, Engine};
 
 /// A perfect play engine using minimax algorithm with alpha-beta pruning
 /// (Included here for demonstration purposes)

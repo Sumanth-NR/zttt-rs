@@ -1,4 +1,4 @@
-use zttt_rs::{Board, Player, GameResult};
+use zttt_rs::backend::{Board, Player, GameResult};
 
 fn main() {
     println!("=== Basic TicTacToe Game Example ===\n");

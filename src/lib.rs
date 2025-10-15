@@ -2,12 +2,27 @@
 //!
 //! The fastest and most optimized Rust backend for simulating TicTacToe games.
 //!
-//! This crate provides:
+//! ## Architecture
+//!
+//! This crate is organized into two main modules:
+//!
+//! ### Backend Module
+//! Core game logic and engine implementations optimized for maximum performance:
 //! - **Blazing fast game simulations**: Optimized for high-throughput scenarios
 //! - **Efficient game state representation**: Minimal memory footprint for large-scale simulations
 //! - **Move validation and game logic**: Fast and reliable core game mechanics
 //! - **Pluggable engine trait**: Implement custom move selection logic for different use cases
 //! - **High-speed engine**: FastEngine for maximum throughput in simulations
+//!
+//! ### Simulation Module (Planned)
+//! High-performance simulation framework for batch processing:
+//! - **Sequential and parallel simulation runners**: Scale from single to multi-core
+//! - **Configurable simulation scenarios**: Flexible setup for various use cases
+//! - **Statistics and analysis**: Comprehensive data collection and insights
+//! - **Tournament system**: Engine matchups and comparisons
+//! - **Memory optimization**: Efficient handling of millions of games
+//!
+//! See [`simulation`] module documentation for detailed planning and roadmap.
 //!
 //! ## Example
 //!
@@ -25,6 +40,9 @@
 
 // Core backend module - game logic and engine implementations
 pub mod backend;
+
+// Simulation module - high-performance batch simulation framework
+pub mod simulation;
 
 // Re-export public API from backend for convenience
 pub use backend::{Board, Player, Cell, GameResult, Engine, FastEngine};

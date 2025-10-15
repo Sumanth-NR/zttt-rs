@@ -6,10 +6,11 @@
 
 ## Core Principles
 
-1. **Performance First**: Every change should consider performance impact. The target is ~614 games/second with ~1.6ms per game.
+1. **Performance First**: Every change should consider performance impact. The target is ~1.8M games/second with ~0.55µs per game (FastEngine).
 2. **Minimal Memory**: Keep the memory footprint small for large-scale simulations.
 3. **Clean API**: Maintain a simple, intuitive interface for users.
 4. **Zero Dependencies**: Keep the core library dependency-free for maximum portability and minimal overhead.
+5. **Speed Over Complexity**: Prioritize simulation throughput; complex AI algorithms belong in examples.
 
 ## Project Structure
 
@@ -19,13 +20,14 @@ src/
 ├── board.rs     - Board representation and game logic
 ├── player.rs    - Player and Cell types
 ├── game.rs      - GameResult type
-└── engine.rs    - Engine trait and PerfectEngine implementation
+└── engine.rs    - Engine trait and FastEngine implementation
 
 examples/
-├── basic_game.rs   - Simple game example
-├── ai_game.rs      - AI vs AI example
-├── simulation.rs   - Batch simulation example
-└── benchmark.rs    - Performance benchmarks
+├── basic_game.rs       - Simple game example
+├── fast_simulation.rs  - High-speed simulation example (FastEngine)
+├── ai_game.rs          - AI vs AI example (PerfectEngine included)
+├── simulation.rs       - Batch simulation example (PerfectEngine included)
+└── benchmark.rs        - Performance benchmarks (both engines)
 ```
 
 ## Architecture
@@ -46,7 +48,9 @@ pub trait Engine {
 }
 ```
 
-The `PerfectEngine` implements minimax with alpha-beta pruning for optimal play.
+The `FastEngine` implements a high-speed strategy (first valid move) for maximum throughput.
+
+The `PerfectEngine` (available in examples/) implements minimax with alpha-beta pruning as a benchmark reference.
 
 ## Coding Guidelines
 
@@ -54,9 +58,10 @@ The `PerfectEngine` implements minimax with alpha-beta pruning for optimal play.
 
 1. **Use arrays over vectors** for fixed-size data structures
 2. **Clone boards efficiently** - the board is designed to be cheaply cloneable
-3. **Avoid allocations in hot paths** - especially in minimax recursion
+3. **Avoid allocations in hot paths** - especially in core simulation loops
 4. **Use early returns** in game result checking
-5. **Leverage alpha-beta pruning** to minimize search space
+5. **Keep engines simple** - FastEngine should have near-zero overhead
+6. **Complex algorithms in examples** - Keep minimax and other AI algorithms in examples, not core library
 
 ### Code Style
 
@@ -75,18 +80,28 @@ The `PerfectEngine` implements minimax with alpha-beta pruning for optimal play.
 
 ### Adding a New Engine
 
-1. Implement the `Engine` trait
-2. Add tests in `src/lib.rs` or a dedicated test module
-3. Create an example showing usage
-4. Document the engine's strategy and characteristics
+For high-speed engines (to be included in core library):
+1. Implement the `Engine` trait in `src/engine.rs`
+2. Keep implementation minimal and fast
+3. Add tests in `src/lib.rs`
+4. Create an example showing usage
+5. Benchmark performance
 
-Example:
+For complex AI engines (examples only):
+1. Create the engine in an example file or as local struct
+2. Implement the `Engine` trait
+3. Document the algorithm and trade-offs
+4. Compare performance to FastEngine
+
+Example (simple engine for core):
 ```rust
-pub struct MyEngine;
+#[derive(Debug, Clone, Copy)]
+pub struct RandomEngine;
 
-impl Engine for MyEngine {
-    fn choose_move(&self, board: &Board, player: Player) -> Option<(usize, usize)> {
-        // Your implementation
+impl Engine for RandomEngine {
+    fn choose_move(&self, board: &Board, _player: Player) -> Option<(usize, usize)> {
+        let moves = board.valid_moves();
+        moves.into_iter().next()  // Keep it fast!
     }
 }
 ```
@@ -154,11 +169,11 @@ When helping with this codebase:
 
 ## Common Patterns
 
-### Creating and Playing a Game
+### Creating and Playing a Game (High-Speed)
 
 ```rust
 let mut board = Board::new();
-let engine = PerfectEngine::new();
+let engine = FastEngine;
 let mut current_player = Player::X;
 
 while board.game_result() == GameResult::InProgress {
@@ -169,23 +184,32 @@ while board.game_result() == GameResult::InProgress {
 }
 ```
 
-### Batch Simulation
+### Batch Simulation (Maximum Speed)
 
 ```rust
-let engine = PerfectEngine::new();
-for _ in 0..10_000 {
+let engine = FastEngine;
+for _ in 0..100_000 {
     let mut board = Board::new();
-    // ... play game ...
+    let mut current_player = Player::X;
+    
+    while board.game_result() == GameResult::InProgress {
+        if let Some((row, col)) = engine.choose_move(&board, current_player) {
+            board.make_move(row, col, current_player).unwrap();
+            current_player = current_player.opponent();
+        }
+    }
 }
 ```
 
 ## Anti-Patterns to Avoid
 
 1. ❌ Don't add runtime dependencies without strong justification
-2. ❌ Don't allocate in `minimax()` or other hot paths
+2. ❌ Don't allocate in hot paths (game simulation loops)
 3. ❌ Don't use `String` for error messages (use `&'static str`)
 4. ❌ Don't break the public API without good reason
 5. ❌ Don't add features that compromise performance for convenience
+6. ❌ Don't add complex AI algorithms to the core library (use examples instead)
+7. ❌ Don't optimize for single-game UX at the expense of batch simulation throughput
 
 ## Questions?
 

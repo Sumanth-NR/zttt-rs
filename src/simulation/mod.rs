@@ -193,10 +193,16 @@
 // - Custom engine integration guide
 // - Migration guide from current examples
 
-// Placeholder exports (will be implemented in phases)
-// pub struct SimulationConfig;
-// pub struct SimulationResult;
-// pub struct Simulator;
+// Phase 1 Implementation - Core Sequential Simulator
+mod config;
+mod result;
+mod simulator;
+
+pub use config::SimulationConfig;
+pub use result::SimulationResult;
+pub use simulator::Simulator;
+
+// Future phases (will be implemented later)
 // pub struct ParallelConfig;
 // pub struct ParallelSimulator;
 // pub struct Statistics;

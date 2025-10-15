@@ -3,8 +3,8 @@
 //! This module provides abstractions for move selection strategies optimized
 //! for high-speed game simulations.
 
-use crate::board::Board;
-use crate::player::Player;
+use crate::backend::board::Board;
+use crate::backend::player::Player;
 
 /// Trait for implementing custom game engines
 ///

@@ -23,16 +23,11 @@
 //! println!("Next move: {:?}", next_move);
 //! ```
 
-mod player;
-mod game;
-mod board;
-mod engine;
+// Core backend module - game logic and engine implementations
+pub mod backend;
 
-// Re-export public API
-pub use player::{Player, Cell};
-pub use game::GameResult;
-pub use board::Board;
-pub use engine::{Engine, FastEngine};
+// Re-export public API from backend for convenience
+pub use backend::{Board, Player, Cell, GameResult, Engine, FastEngine};
 
 #[cfg(test)]
 mod tests {

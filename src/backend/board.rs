@@ -1,9 +1,9 @@
 //! Board representation and game logic
 
 use std::fmt;
-use crate::player::{Player, Cell};
-use crate::game::GameResult;
-use crate::engine::Engine;
+use crate::backend::player::{Player, Cell};
+use crate::backend::game::GameResult;
+use crate::backend::engine::Engine;
 
 /// The TicTacToe board
 #[derive(Debug, Clone, PartialEq, Eq)]

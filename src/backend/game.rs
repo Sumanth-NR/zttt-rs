@@ -1,6 +1,6 @@
 //! Game result type
 
-use crate::player::Player;
+use crate::backend::player::Player;
 
 /// Represents the result of a game
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

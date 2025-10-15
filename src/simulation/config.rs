@@ -20,6 +20,7 @@ pub struct SimulationConfig<E> {
     pub(crate) num_games: usize,
     pub(crate) engine: E,
     pub(crate) starting_player: Player,
+    #[allow(dead_code)] // Reserved for future reproducibility feature
     pub(crate) seed: Option<u64>,
 }
 

@@ -50,6 +50,73 @@ impl<E: Engine> Simulator<E> {
         Self { config }
     }
 
+    /// Run the simulation sequentially with a callback
+    ///
+    /// The callback is invoked after each game with the game result.
+    /// This allows for custom processing, progress tracking, or streaming results.
+    ///
+    /// # Performance
+    ///
+    /// Using a callback adds minimal overhead when the callback is simple.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use zttt_rs::simulation::{Simulator, SimulationConfig};
+    /// use zttt_rs::backend::{FastEngine, Player, GameResult};
+    ///
+    /// let config = SimulationConfig::builder()
+    ///     .num_games(1000)
+    ///     .engine(FastEngine)
+    ///     .starting_player(Player::X)
+    ///     .build();
+    ///
+    /// let simulator = Simulator::new(config);
+    /// let mut game_count = 0;
+    /// let result = simulator.run_with_callback(|_result| {
+    ///     game_count += 1;
+    /// });
+    ///
+    /// assert_eq!(game_count, 1000);
+    /// ```
+    pub fn run_with_callback<F>(self, mut callback: F) -> SimulationResult
+    where
+        F: FnMut(GameResult),
+    {
+        let start = Instant::now();
+        
+        let mut x_wins = 0;
+        let mut o_wins = 0;
+        let mut draws = 0;
+        
+        for _ in 0..self.config.num_games {
+            let result = self.simulate_single_game();
+            
+            // Invoke callback
+            callback(result);
+            
+            // Update statistics
+            match result {
+                GameResult::Win(Player::X) => x_wins += 1,
+                GameResult::Win(Player::O) => o_wins += 1,
+                GameResult::Draw => draws += 1,
+                GameResult::InProgress => {
+                    panic!("Game ended in InProgress state");
+                }
+            }
+        }
+        
+        let total_duration = start.elapsed();
+        
+        SimulationResult::new(
+            self.config.num_games,
+            x_wins,
+            o_wins,
+            draws,
+            total_duration,
+        )
+    }
+
     /// Run the simulation sequentially on a single thread
     ///
     /// This method runs all configured games sequentially and collects
@@ -210,5 +277,52 @@ mod tests {
         
         assert_eq!(result_x.games_completed(), 100);
         assert_eq!(result_o.games_completed(), 100);
+    }
+
+    #[test]
+    fn test_callback_invocation() {
+        let config = SimulationConfig::builder()
+            .num_games(50)
+            .engine(FastEngine)
+            .starting_player(Player::X)
+            .build();
+        
+        let mut callback_count = 0;
+        let simulator = Simulator::new(config);
+        
+        let result = simulator.run_with_callback(|_result| {
+            callback_count += 1;
+        });
+        
+        assert_eq!(callback_count, 50);
+        assert_eq!(result.games_completed(), 50);
+    }
+
+    #[test]
+    fn test_callback_receives_results() {
+        let config = SimulationConfig::builder()
+            .num_games(100)
+            .engine(FastEngine)
+            .starting_player(Player::X)
+            .build();
+        
+        let mut x_wins = 0;
+        let mut o_wins = 0;
+        let mut draws = 0;
+        
+        let simulator = Simulator::new(config);
+        let result = simulator.run_with_callback(|game_result| {
+            match game_result {
+                GameResult::Win(Player::X) => x_wins += 1,
+                GameResult::Win(Player::O) => o_wins += 1,
+                GameResult::Draw => draws += 1,
+                GameResult::InProgress => {}
+            }
+        });
+        
+        // Callback counts should match result counts
+        assert_eq!(x_wins, result.x_wins());
+        assert_eq!(o_wins, result.o_wins());
+        assert_eq!(draws, result.draws());
     }
 }

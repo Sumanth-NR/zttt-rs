@@ -1,4 +1,4 @@
-use zttt_rs::{Board, Player, GameResult, FastEngine, Engine};
+use zttt_rs::backend::{Board, Player, GameResult, FastEngine, Engine};
 use std::time::Instant;
 
 fn simulate_game() -> GameResult {

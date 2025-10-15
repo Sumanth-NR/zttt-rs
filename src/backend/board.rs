@@ -124,7 +124,7 @@ impl Board {
     /// # Example
     ///
     /// ```
-    /// use zttt_rs::{Board, Player, FastEngine};
+    /// use zttt_rs::backend::{Board, Player, FastEngine};
     ///
     /// let board = Board::new();
     /// let engine = FastEngine;

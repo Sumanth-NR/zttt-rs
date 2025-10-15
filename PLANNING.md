@@ -18,7 +18,7 @@ The original structure mixed core game logic with simulation code in examples. T
 ```
 zttt-rs/
 ├── src/
-│   ├── lib.rs              # Main entry point, re-exports public API
+│   ├── lib.rs              # Main entry point
 │   ├── backend/            # Core game logic (STABLE)
 │   │   ├── mod.rs          # Backend module entry
 │   │   ├── board.rs        # Board representation and game logic
@@ -69,25 +69,23 @@ zttt-rs/
 - Sequential: Match backend performance
 - Parallel: Near-linear scaling up to 8+ cores
 
-## Backward Compatibility
+## Module Structure
 
-**Public API**: Unchanged! All existing code continues to work:
+**Direct Module Access**: All components are accessed through their respective modules:
 
 ```rust
-// Still works exactly as before
-use zttt_rs::{Board, Player, GameResult, FastEngine, Engine};
+// Import from backend module
+use zttt_rs::backend::{Board, Player, GameResult, FastEngine, Engine};
 
 let mut board = Board::new();
 let engine = FastEngine;
-// ... existing code ...
+// ... code ...
 ```
 
 **Internal Structure**: 
-- Old: `src/board.rs`, `src/engine.rs`, etc.
-- New: `src/backend/board.rs`, `src/backend/engine.rs`, etc.
-- Re-exports: `pub use backend::{Board, Engine, ...}` maintains compatibility
-
-**Examples**: All examples continue to work without modification
+- Core game logic: `src/backend/` (board, player, game, engine)
+- Simulation framework: `src/simulation/` (planned)
+- No root-level re-exports - use modules directly
 
 ## Implementation Plan
 
@@ -95,7 +93,7 @@ let engine = FastEngine;
 
 - [x] Create `src/backend/` directory
 - [x] Move core files to backend module
-- [x] Create `backend/mod.rs` with re-exports
+- [x] Create `backend/mod.rs` to expose backend API
 - [x] Update internal imports
 - [x] Verify all tests pass
 - [x] Verify all examples work
@@ -165,13 +163,13 @@ Once simulation module is implemented, consider:
 
 ## Migration Guide
 
-### For Current Users
+### For Backend Module Users
 
-**No changes required!** The reorganization maintains full backward compatibility:
+Access backend components directly through the module:
 
 ```rust
-// Your existing code works as-is
-use zttt_rs::{Board, Player, FastEngine, Engine};
+// Import from backend module
+use zttt_rs::backend::{Board, Player, FastEngine, Engine};
 ```
 
 ### For Future Simulation Users
@@ -223,7 +221,7 @@ let result = Simulator::new(config).run_sequential();
 
 ### Resolved
 1. ✅ **Module naming**: "backend" chosen for clarity (core game logic)
-2. ✅ **Backward compatibility**: Full compatibility maintained via re-exports
+2. ✅ **Module access**: Direct module imports (no root re-exports)
 3. ✅ **Planning approach**: Detailed TODOs in code + comprehensive README
 
 ### Open (For Future Phases)

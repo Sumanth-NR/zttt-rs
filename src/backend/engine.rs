@@ -14,7 +14,7 @@ use crate::backend::player::Player;
 /// # Example
 ///
 /// ```
-/// use zttt_rs::{Board, Player, Engine, FastEngine};
+/// use zttt_rs::backend::{Board, Player, Engine, FastEngine};
 ///
 /// let board = Board::new();
 /// let engine = FastEngine;
@@ -41,7 +41,7 @@ pub trait Engine {
 /// # Example
 ///
 /// ```
-/// use zttt_rs::{Board, Player, Engine, FastEngine};
+/// use zttt_rs::backend::{Board, Player, Engine, FastEngine};
 ///
 /// let board = Board::new();
 /// let engine = FastEngine;

@@ -17,7 +17,7 @@ pub mod player;
 pub mod game;
 pub mod engine;
 
-// Re-export public API for convenience
+// Public API
 pub use board::Board;
 pub use player::{Player, Cell};
 pub use game::GameResult;

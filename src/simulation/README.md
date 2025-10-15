@@ -195,12 +195,12 @@ Avoid accumulating all results in memory.
 - Memory leak detection
 - Long-running stability
 
-## Migration Path
+## Adoption Path
 
-Users currently using examples can migrate gradually:
+Users can adopt simulation features progressively:
 
-1. **Phase 1**: Drop-in replacement for simple simulations
-2. **Phase 2**: Migrate to parallel execution for better performance
+1. **Phase 1**: Use simple sequential simulations
+2. **Phase 2**: Scale to parallel execution for better performance
 3. **Phase 3**: Add statistics collection for insights
 4. **Phase 4**: Adopt advanced features as needed
 

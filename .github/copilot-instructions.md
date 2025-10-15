@@ -11,16 +11,22 @@
 3. **Clean API**: Maintain a simple, intuitive interface for users.
 4. **Zero Dependencies**: Keep the core library dependency-free for maximum portability and minimal overhead.
 5. **Speed Over Complexity**: Prioritize simulation throughput; complex AI algorithms belong in examples.
+6. **No Backward Compatibility**: Breaking changes are acceptable when they improve the design. Focus on the best solution, not maintaining old APIs.
 
 ## Project Structure
 
 ```
 src/
-├── lib.rs       - Public API and re-exports
-├── board.rs     - Board representation and game logic
-├── player.rs    - Player and Cell types
-├── game.rs      - GameResult type
-└── engine.rs    - Engine trait and FastEngine implementation
+├── lib.rs              - Main entry point
+├── backend/            - Core game logic module
+│   ├── mod.rs         - Backend module entry
+│   ├── board.rs       - Board representation and game logic
+│   ├── player.rs      - Player and Cell types
+│   ├── game.rs        - GameResult type
+│   └── engine.rs      - Engine trait and FastEngine implementation
+└── simulation/         - Simulation framework (planned)
+    ├── mod.rs         - Simulation module with planning TODOs
+    └── README.md      - Architecture design document
 
 examples/
 ├── basic_game.rs       - Simple game example

@@ -27,7 +27,7 @@
 //! ## Example
 //!
 //! ```
-//! use zttt_rs::{Board, Player, GameResult, FastEngine, Engine};
+//! use zttt_rs::backend::{Board, Player, GameResult, FastEngine, Engine};
 //!
 //! let mut board = Board::new();
 //! board.make_move(0, 0, Player::X).unwrap();
@@ -44,12 +44,9 @@ pub mod backend;
 // Simulation module - high-performance batch simulation framework
 pub mod simulation;
 
-// Re-export public API from backend for convenience
-pub use backend::{Board, Player, Cell, GameResult, Engine, FastEngine};
-
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use crate::backend::*;
 
     #[test]
     fn test_new_board() {
